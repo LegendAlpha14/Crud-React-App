@@ -19,7 +19,7 @@ export default function Form() {
     const [fileUrl, setFileUrl] = useState<any>();
     const [submitState, setSubmitState] = useState(false);
 
-    const { control, unregister, register, handleSubmit, setValue, formState: { errors } } = useForm<any>({
+    const { control, unregister, setError, register, handleSubmit, setValue, formState: { errors } } = useForm<any>({
         defaultValues: { title: '', price: '', discription: '', sku: '', image: '' },
     })
 
@@ -30,7 +30,16 @@ export default function Form() {
 
 
 
+
     // submitState ? image.error
+
+    useEffect(() => {
+        if (submitState) {
+          unregister("lastName");
+        } else {
+          register("image");
+        }
+      }, [register, unregister, submitState]);
 
     //After Click to edit button Form Value set to edited product
     useEffect((): any => {
@@ -71,6 +80,9 @@ export default function Form() {
 
 
     const onSubmit = async (data: any) => {
+
+
+        console.log(data);
 
 
 
@@ -115,22 +127,41 @@ export default function Form() {
 
     const editSubmit = async (data: any) => {
 
+        // let formData = new FormData()
+        // formData = {...data}
+
+        console.log("formData");
+        // console.log(formData);
+
+
         const id = location.state;
 
-        if (data.image) {
+        if (data.image != "") {
+            console.log("data");
+            console.log(data);
+            console.log("image");
+
+            // formData.append("image", image)
+            // formData.append("imageName", image.name)
+
+            // console.log(data.image[0]);
+
+
+            const imageName = data.image.name
+
             data.image = data.image[0]
-            data.imageName = data.image.name;
+            data.imageName = imageName;
         }
 
-
+        // formData.append('_id',id)
         data._id = id
         const config = {
             headers: { 'content-type': 'multipart/form-data' }
         }
 
-        console.log("data");
+        // console.log("data");
 
-        console.log(data);
+        // console.log(data);
 
 
         const response = await axios.post('http://localhost:3000/edit', data, config)
@@ -144,7 +175,7 @@ export default function Form() {
 
 
 
-    console.log(errors.image);
+    // console.log(errors.image);
 
 
 
@@ -248,44 +279,35 @@ export default function Form() {
 
                     <div>Image* {"  "} {errors.image && <span style={{ color: "white" }}>{errors.image.message}</span>}</div>
 
-
                     {
-                        submitState ?
+                        submitState ? <input
+                            multiple={true}
+                            type="file"
+                            id="image"
+                            o
+                            // {...register('image', {
+                            //     onChange: (e: any): any => {
 
-                            show && <input
+                            //         setFileUrl(URL.createObjectURL(e.target.files[0]))
+                            //     },
 
-                                multiple={true}
-                                type="file"
-                                id="image"
-                                {...register('image', {
-                                    onChange: (e: any): any => {
+                            //     required: "image is required"
 
+                            // })}
+                        /> : <input
+                            multiple={true}
+                            type="file"
+                            id="image"
+                            {...register('image', {
+                                onChange: (e: any): any => {
 
-                                        setFileUrl(URL.createObjectURL(e.target.files[0]))
-                                    },
-                                    // required: "image is required",
+                                    setFileUrl(URL.createObjectURL(e.target.files[0]))
+                                },
 
+                                required: "image is required"
 
-
-                                })}
-                            /> :
-                            show && <input
-
-                                multiple={true}
-                                type="file"
-                                id="image"
-                                {...register('image', {
-                                    onChange: (e: any): any => {
-
-
-                                        setFileUrl(URL.createObjectURL(e.target.files[0]))
-                                    },
-                                    required: "image is required",
-
-
-
-                                })}
-                            />
+                            })}
+                        />
                     }
 
                 </label>
